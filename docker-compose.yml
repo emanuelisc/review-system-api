@@ -1,0 +1,59 @@
+version: "3"
+
+services:
+  app:
+    build:
+      context: .
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./app:/app
+    command: >
+      sh -c "python manage.py wait_for_db &&
+              python manage.py migrate &&
+              python manage.py runserver 0.0.0.0:8000"
+    environment:
+      - DB_HOST=10.3.0.3:5432
+      - DB_NAME=revbase0db
+      - DB_USER=revbase0u
+      - DB_PASS=supersecretpassword
+    depends_on:
+      - db
+    networks: 
+      vpcbr:
+  
+  db:
+    image: postgres:10-alpine
+    environment:
+      - POSTGRES_DB=revbase0db
+      - POSTGRES_USER=revbase0u
+      - POSTGRES_PASSWORD=supersecretpassword
+    ports:
+      - "5432:5432"
+    networks: 
+      vpcbr:
+        ipv4_address: 10.3.0.3
+  pgadmin:
+    container_name: pgadmin_container
+    image: dpage/pgadmin4
+    environment:
+      PGADMIN_DEFAULT_EMAIL: ${PGADMIN_DEFAULT_EMAIL:-pgadmin4@pgadmin.org}
+      PGADMIN_DEFAULT_PASSWORD: ${PGADMIN_DEFAULT_PASSWORD:-admin}
+    volumes:
+       - pgadmin:/root/.pgadmin
+    ports:
+      - "${PGADMIN_PORT:-5050}:80"
+    networks: 
+      vpcbr:
+        ipv4_address: 10.3.0.4
+
+networks:
+  vpcbr:
+    driver: bridge
+    ipam: 
+      config:
+        - subnet: 10.3.0.0/16
+
+volumes:
+    postgres:
+    pgadmin:
