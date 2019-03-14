@@ -52,3 +52,11 @@ class AuthTokenSerializer(serializers.Serializer):
 
         attrs['user'] = user
         return attrs
+
+
+class AdminUsersSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = get_user_model()
+        fields = ('id', 'email', 'password', 'name', 'is_staff', 'is_company')
+        read_only_fields = ('id',)
