@@ -45,3 +45,23 @@ class User(AbstractBaseUser, PermissionsMixin):
     objects = UserManager()
 
     USERNAME_FIELD = 'email'
+
+
+class PageCategory(models.Model):
+    # Page category
+    name = models.CharField(max_length=255)
+
+    def __str__(self):
+        return self.name
+
+
+class Page(models.Model):
+    # Page object
+    title = models.CharField(max_length=255)
+    text = models.TextField()
+    slug = models.CharField(max_length=255, blank=True)
+    categories = models.ManyToManyField('PageCategory')
+    # image = models.ImageField(null=True, upload_to=recipe_image_file_path)
+
+    def __str__(self):
+        return self.title
