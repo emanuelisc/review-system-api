@@ -27,7 +27,8 @@ class PageSerializer(serializers.ModelSerializer):
             'title',
             'text',
             'slug',
-            'categories'
+            'categories',
+            'image'
         )
         read_only_fields = ('id',)
 
@@ -35,3 +36,12 @@ class PageSerializer(serializers.ModelSerializer):
 class PageDetailSerializer(PageSerializer):
     # Serialize a page details
     categories = PageCategorySerializer(many=True, read_only=True)
+
+
+class PageImageSerializer(serializers.ModelSerializer):
+    # Serializer for uploading image to page
+
+    class Meta:
+        model = Page
+        fields = ('id', 'image')
+        read_only_fields = ('id',)
