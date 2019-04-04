@@ -13,6 +13,22 @@ def page_image_file_path(instance, filename):
     return os.path.join('uploads/pages/', filename)
 
 
+def provider_service_image_file_path(instance, filename):
+    # Generate file path for new service image
+    ext = filename.split('.')[-1]
+    filename = f'{uuid.uuid4()}.{ext}'
+
+    return os.path.join('uploads/providers/services/', filename)
+
+
+def provider_image_file_path(instance, filename):
+    # Generate file path for new provider image
+    ext = filename.split('.')[-1]
+    filename = f'{uuid.uuid4()}.{ext}'
+
+    return os.path.join('uploads/providers/', filename)
+
+
 class UserManager(BaseUserManager):
 
     def create_user(self, email, password=None, **extra_fields):
@@ -62,6 +78,30 @@ class Page(models.Model):
     slug = models.CharField(max_length=255, blank=True)
     categories = models.ManyToManyField('PageCategory')
     image = models.ImageField(null=True, upload_to=page_image_file_path)
+
+    def __str__(self):
+        return self.title
+
+
+class ProviderService(models.Model):
+    # Page category
+    title = models.CharField(max_length=255)
+    description = models.TextField()
+    provider = models.ForeignKey('Provider', on_delete=models.CASCADE)
+    image = models.ImageField(
+        null=True, upload_to=provider_service_image_file_path)
+
+    def __str__(self):
+        return self.title
+
+
+class Provider(models.Model):
+    # Page object
+    title = models.CharField(max_length=255)
+    description = models.TextField()
+    is_active = models.BooleanField(default=True)
+    is_confirmed = models.BooleanField(default=False)
+    image = models.ImageField(null=True, upload_to=provider_image_file_path)
 
     def __str__(self):
         return self.title
