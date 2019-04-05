@@ -15,21 +15,15 @@ from core.models import Provider, ProviderService
 from provider.serializers import ProviderSerializer, ProviderDetailSerializer
 
 
-ADMIN_PROVIDERS_URL = reverse('provider:adminprovider-list')
 PROVIDERS_URL = reverse('provider:providers-list')
 
 
 def image_upload_url(provider_id):
     # Return URL for provider image upload
-    return reverse('provider:adminprovider-upload-image', args=[provider_id])
+    return reverse('provider:providers-upload-image', args=[provider_id])
 
 
 def detail_url(provider_id):
-    # Return provider detail URL
-    return reverse('provider:adminprovider-detail', args=[provider_id])
-
-
-def detail_public_url(provider_id):
     # Return provider detail URL
     return reverse('provider:providers-detail', args=[provider_id])
 
@@ -67,19 +61,11 @@ class PublicProviderApiTests(TestCase):
         self.assertEqual(res.status_code, status.HTTP_200_OK)
         self.assertEqual(res.data, serializer.data)
 
-    def test_auth_required_unsuccessful(self):
-        # Test that authentication is required but unsuccessful
-
-        sample_provider()
-        res = self.client.get(ADMIN_PROVIDERS_URL)
-
-        self.assertEqual(res.status_code, status.HTTP_401_UNAUTHORIZED)
-
     def test_view_provider_detail(self):
         """ Test viewing a provider details """
         provider = sample_provider()
 
-        url = detail_public_url(provider.id)
+        url = detail_url(provider.id)
         res = self.client.get(url)
 
         serializer = ProviderDetailSerializer(provider)
@@ -112,7 +98,7 @@ class PublicProviderApiTests(TestCase):
         new_service = sample_service(title='Service1', provider=provider)
 
         payload = {'title': 'Provider 1', 'services': [new_service.id]}
-        url = detail_public_url(provider.id)
+        url = detail_url(provider.id)
         self.client.patch(url, payload)
 
         provider.refresh_from_db()
@@ -135,7 +121,7 @@ class PrivateProviderApiTests(TestCase):
         """ Test retrieving a list of providers for admin """
         sample_provider(title='Provider 1')
 
-        res = self.client.get(ADMIN_PROVIDERS_URL)
+        res = self.client.get(PROVIDERS_URL)
 
         providers = Provider.objects.all().order_by('-id')
         serializer = ProviderSerializer(providers, many=True)
@@ -162,7 +148,7 @@ class PrivateProviderApiTests(TestCase):
             'title': 'Puslapis 1',
             'description': 'Lorem ipsum'
         }
-        res = self.client.post(ADMIN_PROVIDERS_URL, payload)
+        res = self.client.post(PROVIDERS_URL, payload)
         self.assertEqual(res.status_code, status.HTTP_201_CREATED)
         provider = Provider.objects.get(id=res.data['id'])
         for key in payload.keys():
@@ -177,7 +163,7 @@ class PrivateProviderApiTests(TestCase):
         provider3 = sample_provider(title='Provider 3')
 
         res = self.client.get(
-            ADMIN_PROVIDERS_URL,
+            PROVIDERS_URL,
             {'services': f'{service1.id},{service2.id}'}
         )
 

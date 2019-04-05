@@ -10,7 +10,7 @@ from provider import serializers
 
 
 class ServiceViewSet(viewsets.ModelViewSet):
-    # Viewset for provider service attributes -> public
+    # Viewset for provider service attributes
     authentication_classes = (TokenAuthentication,)
     permission_classes = (IsAuthenticated | ReadOnly,)
     queryset = ProviderService.objects.all()
@@ -32,8 +32,10 @@ class ServiceViewSet(viewsets.ModelViewSet):
         serializer.save()
 
 
-class ProviderViewSet(viewsets.ReadOnlyModelViewSet):
-    # Manage page in the database
+class ProviderViewSet(viewsets.ModelViewSet):
+    # Viewset for Provider
+    authentication_classes = (TokenAuthentication,)
+    permission_classes = (IsAuthenticated | ReadOnly,)
     serializer_class = serializers.ProviderSerializer
     queryset = Provider.objects.all()
 
@@ -43,37 +45,6 @@ class ProviderViewSet(viewsets.ReadOnlyModelViewSet):
 
     def get_queryset(self):
         # Retrieve pages
-        services = self.request.query_params.get('services')
-        queryset = self.queryset
-        if services:
-            service_ids = self._params_to_ints(services)
-            queryset = queryset.filter(services__id__in=service_ids)
-
-        return queryset.filter()
-
-    def get_serializer_class(self):
-        # Return appropriate serializer class
-        if self.action == 'retrieve':
-            return serializers.ProviderDetailSerializer
-        elif self.action == 'upload_image':
-            return serializers.ProviderImageSerializer
-
-        return self.serializer_class
-
-
-class ProviderAdminViewSet(viewsets.ModelViewSet):
-    # Manage recipes in the database
-    serializer_class = serializers.ProviderSerializer
-    queryset = Provider.objects.all()
-    authentication_classes = (TokenAuthentication,)
-    permission_classes = (IsAuthenticated, IsAdminUser,)
-
-    def _params_to_ints(self, qs):
-        # Convert a list of string IDs to a list of integers
-        return [int(str_id) for str_id in qs.split(',')]
-
-    def get_queryset(self):
-        # Retrieve the pages for the authenticated user
         services = self.request.query_params.get('services')
         queryset = self.queryset
         if services:
