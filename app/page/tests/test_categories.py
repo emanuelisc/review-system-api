@@ -10,8 +10,7 @@ from core.models import PageCategory, Page
 from page.serializers import PageCategorySerializer
 
 
-CATEGORIES_URL = reverse('page:admincat-list')
-CATEGORIESLIST_URL = reverse('page:categories-list')
+CATEGORIES_URL = reverse('page:categories-list')
 
 
 def sample_category(name='Naujiena'):
@@ -20,11 +19,6 @@ def sample_category(name='Naujiena'):
 
 
 def detail_url(category_id):
-    # Return recipe detail URL
-    return reverse('page:admincat-detail', args=[category_id])
-
-
-def detail_public_url(category_id):
     # Return recipe detail URL
     return reverse('page:categories-detail', args=[category_id])
 
@@ -40,7 +34,7 @@ class PublicCategoryApiTests(TestCase):
         PageCategory.objects.create(name='Puslapis')
         PageCategory.objects.create(name='Naujiena')
 
-        res = self.client.get(CATEGORIESLIST_URL)
+        res = self.client.get(CATEGORIES_URL)
 
         categories = PageCategory.objects.all().order_by('-name')
         serializer = PageCategorySerializer(categories, many=True)
@@ -50,13 +44,13 @@ class PublicCategoryApiTests(TestCase):
     def test_create_category_public_unsuccessfull(self):
         """ Test create a new category for unauthorized on public end """
         payload = {'name': 'Naujiena'}
-        res = self.client.post(CATEGORIESLIST_URL, payload)
+        res = self.client.post(CATEGORIES_URL, payload)
 
         exists = PageCategory.objects.filter(
             name=payload['name'],
         ).exists()
         self.assertFalse(exists)
-        self.assertEqual(res.status_code, status.HTTP_405_METHOD_NOT_ALLOWED)
+        self.assertEqual(res.status_code, status.HTTP_401_UNAUTHORIZED)
 
     def test_create_category_unsuccessfull(self):
         """ Test create a new category for unauthorized """
@@ -76,7 +70,7 @@ class PublicCategoryApiTests(TestCase):
         exists = PageCategory.objects.filter(name=payload['name'],).exists()
         self.assertTrue(exists)
 
-        url = detail_public_url(category.id)
+        url = detail_url(category.id)
         res = self.client.get(url)
         serializer = PageCategorySerializer(category)
 

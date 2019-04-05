@@ -10,8 +10,7 @@ from core.models import Provider, ProviderService
 from provider.serializers import ProviderServiceSerializer
 
 
-SERVICES_URL = reverse('provider:adminservice-list')
-SERVICESLIST_URL = reverse('provider:services-list')
+SERVICES_URL = reverse('provider:services-list')
 
 
 def sample_service(title='Maisto gaminimas', description='Lorem ipsum'):
@@ -30,11 +29,6 @@ def sample_provider(title='Maistininkas ir Ko', description='Lorem ipsum'):
 
 
 def detail_url(service_id):
-    # Return service detail URL
-    return reverse('provider:adminservice-detail', args=[service_id])
-
-
-def detail_public_url(service_id):
     # Return service detail URL
     return reverse('provider:services-detail', args=[service_id])
 
@@ -59,7 +53,7 @@ class PublicServiceApiTests(TestCase):
             provider=provider
         )
 
-        res = self.client.get(SERVICESLIST_URL)
+        res = self.client.get(SERVICES_URL)
 
         services = ProviderService.objects.all().order_by('-title')
         serializer = ProviderServiceSerializer(services, many=True)
@@ -69,13 +63,13 @@ class PublicServiceApiTests(TestCase):
     def test_create_service_public_unsuccessfull(self):
         """ Test create a new service for unauthorized on public end """
         payload = {'title': 'Naujiena'}
-        res = self.client.post(SERVICESLIST_URL, payload)
+        res = self.client.post(SERVICES_URL, payload)
 
         exists = ProviderService.objects.filter(
             title=payload['title'],
         ).exists()
         self.assertFalse(exists)
-        self.assertEqual(res.status_code, status.HTTP_405_METHOD_NOT_ALLOWED)
+        self.assertEqual(res.status_code, status.HTTP_401_UNAUTHORIZED)
 
     def test_create_service_unsuccessfull(self):
         """ Test create a new service for unauthorized """
@@ -96,7 +90,7 @@ class PublicServiceApiTests(TestCase):
             title=payload['title'],).exists()
         self.assertTrue(exists)
 
-        url = detail_public_url(service.id)
+        url = detail_url(service.id)
         res = self.client.get(url)
         serializer = ProviderServiceSerializer(service)
 

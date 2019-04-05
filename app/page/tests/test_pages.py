@@ -15,18 +15,17 @@ from core.models import Page, PageCategory
 from page.serializers import PageSerializer, PageDetailSerializer
 
 
-ADMIN_PAGES_URL = reverse('page:adminpages-list')
 PAGES_URL = reverse('page:pages-list')
 
 
 def image_upload_url(page_id):
     # Return URL for page image upload
-    return reverse('page:adminpages-upload-image', args=[page_id])
+    return reverse('page:pages-upload-image', args=[page_id])
 
 
 def detail_url(page_id):
     # Return page detail URL
-    return reverse('page:adminpages-detail', args=[page_id])
+    return reverse('page:pages-detail', args=[page_id])
 
 
 def detail_public_url(page_id):
@@ -66,14 +65,6 @@ class PublicPageApiTests(TestCase):
 
         self.assertEqual(res.status_code, status.HTTP_200_OK)
         self.assertEqual(res.data, serializer.data)
-
-    def test_auth_required_unsuccessful(self):
-        # Test that authentication is required but unsuccessful
-
-        sample_page()
-        res = self.client.get(ADMIN_PAGES_URL)
-
-        self.assertEqual(res.status_code, status.HTTP_401_UNAUTHORIZED)
 
     def test_view_page_detail(self):
         """ Test viewing a page details """
@@ -139,7 +130,7 @@ class PrivatePageApiTests(TestCase):
         """ Test retrieving a list of pages for admin """
         sample_page(title='Page 1')
 
-        res = self.client.get(ADMIN_PAGES_URL)
+        res = self.client.get(PAGES_URL)
 
         pages = Page.objects.all().order_by('-id')
         serializer = PageSerializer(pages, many=True)
@@ -166,7 +157,7 @@ class PrivatePageApiTests(TestCase):
             'title': 'Puslapis 1',
             'text': 'Lorem ipsum'
         }
-        res = self.client.post(ADMIN_PAGES_URL, payload)
+        res = self.client.post(PAGES_URL, payload)
 
         self.assertEqual(res.status_code, status.HTTP_201_CREATED)
         page = Page.objects.get(id=res.data['id'])
@@ -183,7 +174,7 @@ class PrivatePageApiTests(TestCase):
             'text': 'Lorem lipsum',
             'slug': 'puslapis-1'
         }
-        res = self.client.post(ADMIN_PAGES_URL, payload)
+        res = self.client.post(PAGES_URL, payload)
 
         self.assertEqual(res.status_code, status.HTTP_201_CREATED)
         page = Page.objects.get(id=res.data['id'])
@@ -238,7 +229,7 @@ class PrivatePageApiTests(TestCase):
         page3 = sample_page(title='Page 3')
 
         res = self.client.get(
-            ADMIN_PAGES_URL,
+            PAGES_URL,
             {'categories': f'{category1.id},{category2.id}'}
         )
 
