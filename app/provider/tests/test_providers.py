@@ -21,12 +21,12 @@ PROVIDERS_URL = reverse('provider:providers-list')
 
 def image_upload_url(provider_id):
     # Return URL for provider image upload
-    return reverse('provider:adminproviders-upload-image', args=[provider_id])
+    return reverse('provider:adminprovider-upload-image', args=[provider_id])
 
 
 def detail_url(provider_id):
     # Return provider detail URL
-    return reverse('provider:adminproviders-detail', args=[provider_id])
+    return reverse('provider:adminprovider-detail', args=[provider_id])
 
 
 def detail_public_url(provider_id):
@@ -34,9 +34,9 @@ def detail_public_url(provider_id):
     return reverse('provider:providers-detail', args=[provider_id])
 
 
-def sample_service(title='Puslapis'):
+def sample_service(title, provider):
     # Create and return a sample service
-    return ProviderService.objects.create(title=title)
+    return ProviderService.objects.create(title=title, provider=provider)
 
 
 def sample_provider(**params):
@@ -78,7 +78,6 @@ class PublicProviderApiTests(TestCase):
     def test_view_provider_detail(self):
         """ Test viewing a provider details """
         provider = sample_provider()
-        provider.services.add(sample_service())
 
         url = detail_public_url(provider.id)
         res = self.client.get(url)
@@ -90,10 +89,8 @@ class PublicProviderApiTests(TestCase):
         """ Test returning providers with specific service """
         provider1 = sample_provider(title='Provider 1')
         provider2 = sample_provider(title='Provider 2')
-        service1 = sample_service(title='Puslapis')
-        service2 = sample_service(title='Naujiena')
-        provider1.services.add(service1)
-        provider2.services.add(service2)
+        service1 = sample_service(title='Puslapis', provider=provider1)
+        service2 = sample_service(title='Naujiena', provider=provider2)
         provider3 = sample_provider(title='Provider 3')
 
         res = self.client.get(
@@ -112,8 +109,7 @@ class PublicProviderApiTests(TestCase):
     def test_partial_update_provider(self):
         """ Test updating a provider with patch """
         provider = sample_provider()
-        provider.services.add(sample_service())
-        new_service = sample_service(title='Naujiena')
+        new_service = sample_service(title='Service1', provider=provider)
 
         payload = {'title': 'Provider 1', 'services': [new_service.id]}
         url = detail_public_url(provider.id)
@@ -152,7 +148,7 @@ class PrivateProviderApiTests(TestCase):
     def test_view_provider_detail(self):
         """ Test viewing a provider details for admin """
         provider = sample_provider()
-        provider.services.add(sample_service())
+        sample_service(title="Puslapių kūrimas", provider=provider)
 
         url = detail_url(provider.id)
         res = self.client.get(url)
@@ -172,65 +168,12 @@ class PrivateProviderApiTests(TestCase):
         for key in payload.keys():
             self.assertEqual(payload[key], getattr(provider, key))
 
-    def test_create_provider_with_service(self):
-        """ Test creating provider with services """
-        service1 = sample_service(title='Puslapis')
-        service2 = sample_service(title='Naujiena')
-        payload = {
-            'title': 'Puslapis 1',
-            'services': [service1.id, service2.id],
-            'description': 'Lorem lipsum'
-        }
-        res = self.client.post(ADMIN_PROVIDERS_URL, payload)
-
-        self.assertEqual(res.status_code, status.HTTP_201_CREATED)
-        provider = Provider.objects.get(id=res.data['id'])
-        services = provider.services.all()
-        self.assertEqual(services.count(), 2)
-        self.assertIn(service1, services)
-        self.assertIn(service2, services)
-
-    def test_partial_update_provider(self):
-        """ Test updating a provider with patch for admin """
-        provider = sample_provider()
-        provider.services.add(sample_service())
-        new_service = sample_service(title='Naujiena')
-
-        payload = {'title': 'Provider 1', 'services': [new_service.id]}
-        url = detail_url(provider.id)
-        self.client.patch(url, payload)
-
-        provider.refresh_from_db()
-        self.assertEqual(provider.title, payload['title'])
-        services = provider.services.all()
-        self.assertEqual(len(services), 1)
-        self.assertIn(new_service, services)
-
-    def test_full_update_recipe(self):
-        """ Test updating a provider with put for admin """
-        provider = sample_provider()
-        provider.services.add(sample_service())
-        payload = {
-            'title': 'Puslapis 1',
-            'description': 'lipsum'
-        }
-        url = detail_url(provider.id)
-        self.client.put(url, payload)
-
-        provider.refresh_from_db()
-        self.assertEqual(provider.title, payload['title'])
-        self.assertEqual(provider.description, payload['description'])
-        services = provider.services.all()
-        self.assertEqual(len(services), 0)
-
     def test_filter_providers_by_services(self):
         """ Test returning providers with specific service for admin """
         provider1 = sample_provider(title='Provider 1')
         provider2 = sample_provider(title='Provider 2')
-        service1 = sample_service(title='Puslapis')
-        service2 = sample_service(title='Naujiena')
-        provider1.services.add(service1)
-        provider2.services.add(service2)
+        service1 = sample_service(title='Puslapis', provider=provider1)
+        service2 = sample_service(title='Naujiena', provider=provider2)
         provider3 = sample_provider(title='Provider 3')
 
         res = self.client.get(

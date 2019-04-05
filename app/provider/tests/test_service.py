@@ -17,7 +17,11 @@ SERVICESLIST_URL = reverse('provider:services-list')
 def sample_service(title='Maisto gaminimas', description='Lorem ipsum'):
     # Create and return a sample service
     provider = sample_provider()
-    return ProviderService.objects.create(title=title, description=description, provider=provider)
+    return ProviderService.objects.create(
+        title=title,
+        description=description,
+        provider=provider
+    )
 
 
 def sample_provider(title='Maistininkas ir Ko', description='Lorem ipsum'):
@@ -183,10 +187,6 @@ class PrivateAdminServiceApiTests(TestCase):
         # Test filtering services by those assigned to providers
         provider1 = Provider.objects.create(
             title='Maistas ir Ko',
-            description='Lorem ipsum'
-        )
-        provider2 = Provider.objects.create(
-            title='Langdita',
             description='Lorem ipsum'
         )
         service1 = ProviderService.objects.create(
