@@ -151,12 +151,13 @@ class Ticket(models.Model):
     title = models.CharField(max_length=255)
     description = models.TextField()
     date = models.DateField(auto_now=True)
-    object_type = models.IntegerField(blank=True)
-    object_id = models.IntegerField(blank=True)
+    object_type = models.IntegerField(null=True)
+    object_id = models.IntegerField(null=True)
     is_active = models.BooleanField(default=True)
     user = models.ForeignKey(
         settings.AUTH_USER_MODEL,
-        on_delete=models.CASCADE
+        on_delete=models.CASCADE,
+        null=True
     )
 
     def __str__(self):
