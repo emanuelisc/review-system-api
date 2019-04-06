@@ -45,6 +45,7 @@ INSTALLED_APPS = [
     'provider',
     'review',
     'ticket',
+    'rest_framework_tracking',
 ]
 
 MIDDLEWARE = [
