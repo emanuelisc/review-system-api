@@ -29,7 +29,8 @@ class ProviderSerializer(serializers.ModelSerializer):
             'is_active',
             'is_confirmed',
             'image',
-            'services'
+            'services',
+            'admin_user'
         )
         read_only_fields = ('id',)
 
@@ -37,7 +38,6 @@ class ProviderSerializer(serializers.ModelSerializer):
 class ProviderDetailSerializer(ProviderSerializer):
     # Serialize a provider details
     services = serializers.PrimaryKeyRelatedField(many=True, read_only=True)
-    # services = ProviderServiceSerializer(many=True, read_only=True)
 
 
 class ProviderImageSerializer(serializers.ModelSerializer):

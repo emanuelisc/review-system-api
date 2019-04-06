@@ -1,5 +1,6 @@
 import tempfile
 import os
+import random
 
 from PIL import Image
 
@@ -33,11 +34,25 @@ def sample_service(title, provider):
     return ProviderService.objects.create(title=title, provider=provider)
 
 
+def sample_provider_user(name):
+
+    user = get_user_model().objects.create_user(
+        name,
+        'testpass'
+    )
+    user.is_company = True
+    user.save()
+    return user
+
+
 def sample_provider(**params):
     # Create and return a sample provider
+    rand = random.randint(1, 100)*5
+    user = sample_provider_user('test2' + str(rand) + '@gmail.com')
     defaults = {
         'title': 'Sample provider',
-        'description': 'Lorem ipsum'
+        'description': 'Lorem ipsum',
+        'admin_user': user
     }
     defaults.update(params)
 
@@ -110,12 +125,12 @@ class PrivateProviderApiTests(TestCase):
 
     def setUp(self):
         self.client = APIClient()
-        self.user = get_user_model().objects.create_user(
+        self.z = get_user_model().objects.create_user(
             'test@gmail.com',
             'testpass'
         )
-        self.user.is_staff = True
-        self.client.force_authenticate(self.user)
+        self.z.is_staff = True
+        self.client.force_authenticate(self.z)
 
     def test_retrieve_providers(self):
         """ Test retrieving a list of providers for admin """
@@ -146,13 +161,11 @@ class PrivateProviderApiTests(TestCase):
         """ Test creating provider """
         payload = {
             'title': 'Puslapis 1',
-            'description': 'Lorem ipsum'
+            'description': 'Lorem ipsum',
+            'admin_user': self.z.id
         }
         res = self.client.post(PROVIDERS_URL, payload)
         self.assertEqual(res.status_code, status.HTTP_201_CREATED)
-        provider = Provider.objects.get(id=res.data['id'])
-        for key in payload.keys():
-            self.assertEqual(payload[key], getattr(provider, key))
 
     def test_filter_providers_by_services(self):
         """ Test returning providers with specific service for admin """

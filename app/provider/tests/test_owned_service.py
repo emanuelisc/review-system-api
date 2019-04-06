@@ -12,7 +12,7 @@ from core.models import Provider, ProviderService
 from provider.serializers import ProviderServiceSerializer
 
 
-SERVICES_URL = reverse('provider:services-list')
+SERVICES_URL = reverse('provider:ownservices-list')
 
 
 def sample_service(title='Maisto gaminimas', description='Lorem ipsum'):
@@ -72,10 +72,7 @@ class PublicServiceApiTests(TestCase):
 
         res = self.client.get(SERVICES_URL)
 
-        services = ProviderService.objects.all().order_by('-title')
-        serializer = ProviderServiceSerializer(services, many=True)
-        self.assertEqual(res.status_code, status.HTTP_200_OK)
-        self.assertEqual(res.data, serializer.data)
+        self.assertEqual(res.status_code, status.HTTP_401_UNAUTHORIZED)
 
     def test_create_service_public_unsuccessfull(self):
         """ Test create a new service for unauthorized on public end """
@@ -135,18 +132,19 @@ class PrivateAdminServiceApiTests(TestCase):
         self.client = APIClient()
         self.user = get_user_model().objects.create_user(
             'test@gmail.com',
-            'testpass'
+            'testpass',
         )
-        self.user.is_staff = True
+        self.user.is_company = True
+        provider = sample_provider()
+        self.user.provider_id = provider
         self.client.force_authenticate(self.user)
 
     def test_create_service_successfull(self):
         """ Test create a new service """
-        provider = sample_provider()
         payload = {
             'title': 'Maisto ruosimas2',
             'description': 'Lorem ipsum2',
-            'provider': provider.id
+            'provider': self.user.provider_id_id
         }
         res1 = self.client.post(SERVICES_URL, payload)
         self.assertEqual(res1.status_code, status.HTTP_201_CREATED)
@@ -157,11 +155,10 @@ class PrivateAdminServiceApiTests(TestCase):
 
     def test_service_details(self):
         """ Test service details """
-        provider = sample_provider()
         payload = {
             'title': 'Maisto ruošimas',
             'description': 'Lorem ipsum',
-            'provider': provider
+            'provider': self.user.provider_id
         }
         service = sample_service(title='Maisto ruošimas')
         exists = ProviderService.objects.filter(
@@ -185,7 +182,7 @@ class PrivateAdminServiceApiTests(TestCase):
         url = detail_url(service.id)
         res = self.client.delete(url)
 
-        self.assertEqual(res.status_code, status.HTTP_204_NO_CONTENT)
+        self.assertEqual(res.status_code, status.HTTP_403_FORBIDDEN)
 
     def test_create_service_invalid(self):
         # Test creating invalid service fails

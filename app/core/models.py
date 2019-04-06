@@ -60,6 +60,12 @@ class User(AbstractBaseUser, PermissionsMixin):
     is_active = models.BooleanField(default=True)
     is_staff = models.BooleanField(default=False)
     is_company = models.BooleanField(default=False)
+    provider_id = models.ForeignKey(
+        'Provider',
+        related_name='users',
+        on_delete=models.CASCADE,
+        null=True
+    )
     objects = UserManager()
 
     USERNAME_FIELD = 'email'
@@ -106,6 +112,8 @@ class Provider(models.Model):
     # Provider object
     title = models.CharField(max_length=255)
     description = models.TextField()
+    admin_user = models.ForeignKey(
+        'User', related_name='provider_admin', on_delete=models.DO_NOTHING)
     is_active = models.BooleanField(default=True)
     is_confirmed = models.BooleanField(default=False)
     image = models.ImageField(null=True, upload_to=provider_image_file_path)
