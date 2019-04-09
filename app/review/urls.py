@@ -12,5 +12,7 @@ router.register('reviews', views.ReviewViewSet)
 app_name = 'review'
 
 urlpatterns = [
-    path('', include(router.urls))
+    path('', include(router.urls)),
+    path('confirm_review/',
+         views.ConfirmReviewView.as_view(), name='confirm_review'),
 ]

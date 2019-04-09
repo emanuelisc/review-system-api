@@ -45,7 +45,6 @@ INSTALLED_APPS = [
     'provider',
     'review',
     'ticket',
-    'rest_framework_tracking',
 ]
 
 MIDDLEWARE = [
@@ -110,6 +109,12 @@ AUTH_PASSWORD_VALIDATORS = [
         'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator',
     },
 ]
+
+EMAIL_HOST = 's1.shop4dev.com'
+EMAIL_HOST_USER = 'siuntimas@atsiliepimai.tk'
+EMAIL_HOST_PASSWORD = 'GZwZHdfbt4'
+EMAIL_PORT = 25
+EMAIL_USE_TLS = True
 
 
 # Internationalization

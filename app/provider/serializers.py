@@ -8,7 +8,14 @@ class ProviderServiceSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = ProviderService
-        fields = ('id', 'title', 'description', 'provider', 'image')
+        fields = (
+            'id',
+            'title',
+            'description',
+            'provider',
+            'image',
+            'reviews'
+        )
         read_only_fields = ('id',)
 
 
@@ -30,7 +37,8 @@ class ProviderSerializer(serializers.ModelSerializer):
             'is_confirmed',
             'image',
             'services',
-            'admin_user'
+            'admin_user',
+            'reviews'
         )
         read_only_fields = ('id',)
 

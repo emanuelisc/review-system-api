@@ -1,11 +1,11 @@
 from rest_framework.decorators import action
 from rest_framework.response import Response
-from rest_framework import viewsets, mixins, status
+from rest_framework import viewsets, mixins, status, generics
 from rest_framework.authentication import TokenAuthentication
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.exceptions import PermissionDenied
 
-from core.models import Review, ReviewCategory, HashTag
+from core.models import Review, ReviewCategory, HashTag, User, ValidationToken
 from core.permissions import ReadOnly
 from review import serializers
 
@@ -110,3 +110,34 @@ class ReviewViewSet(viewsets.ModelViewSet):
             serializer.errors,
             status=status.HTTP_400_BAD_REQUEST
         )
+
+
+class ConfirmReviewView(generics.RetrieveAPIView):
+    def get(self, serializer):
+        email = self.request.query_params.get('email', None)
+        token = self.request.query_params.get('token', None)
+        review_id = self.request.query_params.get('review', None)
+        if email or review_id or token:
+            try:
+                token_obj = ValidationToken.objects.get(token=token)
+                try:
+                    user = User.objects.get(email=str(email))
+                    user.is_confirmed = True
+                    user.save()
+                    try:
+                        review = Review.objects.get(id=int(review_id))
+                        review.is_anon = False
+                        review.save()
+                        token_obj.delete()
+                        return Response(
+                            {'Aktyvuota'},
+                            status=status.HTTP_200_OK
+                        )
+                    except Review.DoesNotExist:
+                        return Response(None, status=status.HTTP_404_NOT_FOUND)
+                except User.DoesNotExist:
+                    return Response(None, status=status.HTTP_404_NOT_FOUND)
+            except ValidationToken.DoesNotExist:
+                return Response(None, status=status.HTTP_404_NOT_FOUND)
+        else:
+            return Response(None, status=status.HTTP_404_NOT_FOUND)

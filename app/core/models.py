@@ -60,6 +60,7 @@ class User(AbstractBaseUser, PermissionsMixin):
     is_active = models.BooleanField(default=True)
     is_staff = models.BooleanField(default=False)
     is_company = models.BooleanField(default=False)
+    is_confirmed = models.BooleanField(default=False)
     provider_id = models.ForeignKey(
         'Provider',
         related_name='users',
@@ -69,6 +70,11 @@ class User(AbstractBaseUser, PermissionsMixin):
     objects = UserManager()
 
     USERNAME_FIELD = 'email'
+
+
+class ValidationToken(models.Model):
+    user_email = models.CharField(max_length=255)
+    token = models.CharField(max_length=255)
 
 
 class PageCategory(models.Model):
@@ -175,11 +181,16 @@ class Review(models.Model):
     is_auto_confirmed = models.BooleanField(default=False)
     confirmation_text = models.TextField(blank=True)
     is_confirmed = models.BooleanField(default=False)
+    is_anon = models.BooleanField(default=False)
     image = models.ImageField(null=True, upload_to=provider_image_file_path)
     user = models.ForeignKey(
         settings.AUTH_USER_MODEL,
         on_delete=models.CASCADE
     )
+    service = models.ForeignKey(
+        'ProviderService', related_name='reviews', null=True, on_delete=models.DO_NOTHING)
+    provider = models.ForeignKey(
+        'Provider', related_name='reviews', null=True, on_delete=models.DO_NOTHING)
 
     def __str__(self):
         return self.title

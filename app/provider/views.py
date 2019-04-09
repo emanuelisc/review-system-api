@@ -7,10 +7,11 @@ from rest_framework.exceptions import PermissionDenied
 
 from core.models import Provider, ProviderService
 from core.permissions import ReadOnly, IsCompany
+from core.request_log.mixins import RequestLogViewMixin
 from provider import serializers
 
 
-class ServiceOwnerViewSet(viewsets.ModelViewSet):
+class ServiceOwnerViewSet(viewsets.ModelViewSet, RequestLogViewMixin):
     # Viewset for editing and creating services for provider
     authentication_classes = (TokenAuthentication,)
     permission_classes = (IsAuthenticated & IsCompany, )
@@ -45,7 +46,7 @@ class ServiceViewSet(viewsets.ModelViewSet):
         return queryset.all().order_by('-title').distinct()
 
 
-class ProviderOwnerViewSet(viewsets.ModelViewSet):
+class ProviderOwnerViewSet(viewsets.ModelViewSet, RequestLogViewMixin):
     # Viewset for Provider
     authentication_classes = (TokenAuthentication,)
     permission_classes = (IsAuthenticated & IsCompany,)
@@ -115,7 +116,7 @@ class ProviderOwnerViewSet(viewsets.ModelViewSet):
         )
 
 
-class ProviderViewSet(viewsets.ModelViewSet):
+class ProviderViewSet(viewsets.ModelViewSet, RequestLogViewMixin):
     # Viewset for Provider
     authentication_classes = (TokenAuthentication,)
     permission_classes = (IsAuthenticated | ReadOnly,)
@@ -130,6 +131,8 @@ class ProviderViewSet(viewsets.ModelViewSet):
         # Retrieve pages
         services = self.request.query_params.get('services')
         queryset = self.queryset
+        print(self.request.META['REMOTE_ADDR'] + ' Testas3\n')
+
         if services:
             service_ids = self._params_to_ints(services)
             queryset = queryset.filter(services__id__in=service_ids)
