@@ -5,8 +5,6 @@ services:
     hostname: app
     build:
       context: .
-    ports:
-      - "8000:8000"
     volumes:
       - ./app:/app
     command: >
@@ -19,13 +17,23 @@ services:
       - DB_USER=revbase0u
       - DB_PASS=supersecretpassword
       - DJANGO_SECRET_KEY=supersecretkey
-      - DJANGO_SETTINGS = dev
     depends_on:
       - db
     networks:
       vpcbr:
         ipv4_address: 10.3.0.6
 
+  reverse:
+    hostname: reverse
+    image: nginx
+    ports:
+      - 80:80
+      - 443:443
+    volumes:
+      - ./nginx/config:/etc/nginx
+      - ./nginx/certs:/etc/ssl/private
+    networks:
+      vpcbr:
   db:
     image: postgres:10-alpine
     environment:

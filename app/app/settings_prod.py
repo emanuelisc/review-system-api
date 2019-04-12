@@ -26,7 +26,9 @@ SECRET_KEY = os.environ['DJANGO_SECRET_KEY']
 DEBUG = False
 
 ALLOWED_HOSTS = [
-    'api.atsiliepimai.tk'
+    'api.atsiliepimai.tk',
+    'd1.blankspace.lt',
+    'api'
 ]
 
 CSRF_COOKIE_SECURE = True
