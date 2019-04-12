@@ -141,3 +141,54 @@ class ConfirmReviewView(generics.RetrieveAPIView):
                 return Response(None, status=status.HTTP_404_NOT_FOUND)
         else:
             return Response(None, status=status.HTTP_404_NOT_FOUND)
+
+
+class AnonReviewViewSet(viewsets.ModelViewSet):
+    # Manage reviews in the database
+    serializer_class = serializers.ReviewSerializer
+    queryset = Review.objects.all()
+
+    def get_queryset(self):
+        # Retrieve the reviews
+        queryset = self.queryset
+        return queryset.all()
+
+    def get_serializer_class(self):
+        # Return appropriate serializer class
+        if self.action == 'retrieve':
+            return serializers.ReviewDetailSerializer
+        elif self.action == 'upload_image':
+            return serializers.ReviewImageSerializer
+
+        return self.serializer_class
+
+    def perform_create(self, serializer):
+        # Create a new serializer
+        serializer.save(user=self.request.user)
+
+    def perform_update(self, serializer):
+        raise PermissionDenied('You cannot update this object!')
+
+    def perform_destroy(self, instance):
+        raise PermissionDenied('You cannot delete this object!')
+
+    @action(methods=['POST'], detail=True, url_path='upload-image')
+    def upload_image(self, request, pk=None):
+        # Upload an image to a recipe
+        recipe = self.get_object()
+        serializer = self.get_serializer(
+            recipe,
+            data=request.data
+        )
+
+        if serializer.is_valid():
+            serializer.save()
+            return Response(
+                serializer.data,
+                status=status.HTTP_200_OK
+            )
+
+        return Response(
+            serializer.errors,
+            status=status.HTTP_400_BAD_REQUEST
+        )

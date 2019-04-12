@@ -8,6 +8,7 @@ router = DefaultRouter()
 router.register('tags', views.TagViewSet)
 router.register('categories', views.CategoryViewSet)
 router.register('reviews', views.ReviewViewSet)
+router.register('anon', views.AnonReviewViewSet)
 
 app_name = 'review'
 
