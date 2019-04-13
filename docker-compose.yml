@@ -19,7 +19,7 @@ services:
       - DB_USER=revbase0u
       - DB_PASS=supersecretpassword
       - DJANGO_SECRET_KEY=supersecretkey
-      - DJANGO_SETTINGS = dev
+      - DJANGO_SETTINGS=dev
     depends_on:
       - db
     networks:

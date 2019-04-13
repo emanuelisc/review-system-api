@@ -25,4 +25,5 @@ urlpatterns = [
     path('api/provider/', include('provider.urls')),
     path('api/ticket/', include('ticket.urls')),
     path('api/review/', include('review.urls')),
+    path('api/login/', include('rest_social_auth.urls_token')),
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

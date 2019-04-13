@@ -131,7 +131,7 @@ class ProviderViewSet(viewsets.ModelViewSet, RequestLogViewMixin):
         # Retrieve pages
         services = self.request.query_params.get('services')
         queryset = self.queryset
-        print(self.request.META['REMOTE_ADDR'] + ' Testas3\n')
+        # print(self.request.META['REMOTE_ADDR'] + ' Testas3\n')
 
         if services:
             service_ids = self._params_to_ints(services)

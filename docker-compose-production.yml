@@ -10,13 +10,19 @@ services:
     command: >
       sh -c "python manage.py wait_for_db &&
               python manage.py migrate &&W
-              python manage.py runserver 0.0.0.0:8000"
+              gunicorn app.wsgi -b 0.0.0.0:8000"
     environment:
       - DB_HOST=10.3.0.3:5432
       - DB_NAME=revbase0db
       - DB_USER=revbase0u
       - DB_PASS=supersecretpassword
       - DJANGO_SECRET_KEY=supersecretkey
+    deploy:
+      restart_policy:
+        condition: on-failure
+        delay: 5s
+        max_attempts: 3
+        window: 120s
     depends_on:
       - db
     networks:
@@ -55,6 +61,12 @@ services:
        - pgadmin:/root/.pgadmin
     ports:
       - "${PGADMIN_PORT:-5050}:80"
+    deploy:
+      restart_policy:
+        condition: on-failure
+        delay: 5s
+        max_attempts: 3
+        window: 120s
     networks:
       vpcbr:
         ipv4_address: 10.3.0.4
