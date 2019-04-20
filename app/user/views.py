@@ -1,11 +1,14 @@
+from rest_framework.decorators import action
 from rest_framework.response import Response
 from rest_framework import generics, authentication, permissions, viewsets, status
 from rest_framework.authtoken.views import ObtainAuthToken
+from rest_framework.authtoken.models import Token
 from rest_framework.settings import api_settings
 
 from user.serializers import UserSerializer, \
     AuthTokenSerializer, \
-    AdminUsersSerializer
+    AdminUsersSerializer, \
+    UserImageSerializer
 
 from core.models import User, ValidationToken
 from user.mail import ValidateEmail
@@ -54,6 +57,22 @@ class CreateTokenView(ObtainAuthToken):
     serializer_class = AuthTokenSerializer
     renderer_classes = api_settings.DEFAULT_RENDERER_CLASSES
 
+    def post(self, request, *args, **kwargs):
+        serializer = self.serializer_class(data=request.data,
+                                           context={'request': request})
+        serializer.is_valid(raise_exception=True)
+        user = serializer.validated_data['user']
+        token, created = Token.objects.get_or_create(user=user)
+        return Response({
+            'token': token.key,
+            'me': {
+                'email': user.email,
+                'name': user.name,
+                'is_staff': user.is_staff,
+                'is_company': user.is_company
+            }
+        })
+
 
 class ManageUserView(generics.RetrieveUpdateAPIView):
     # Manage the authenticated user
@@ -64,6 +83,27 @@ class ManageUserView(generics.RetrieveUpdateAPIView):
     def get_object(self):
         # Retrieve and return authenticated user
         return self.request.user
+
+    @action(methods=['POST'], detail=True, url_path='upload-image')
+    def upload_image(self, request, pk=None):
+        # Upload an image to a page
+        user = self.request.user()
+        serializer = self.get_serializer(
+            user,
+            data=request.data
+        )
+
+        if serializer.is_valid():
+            serializer.save()
+            return Response(
+                serializer.data,
+                status=status.HTTP_200_OK
+            )
+
+        return Response(
+            serializer.errors,
+            status=status.HTTP_400_BAD_REQUEST
+        )
 
 
 class AdminUsersViewSet(viewsets.ModelViewSet):
@@ -79,4 +119,25 @@ class AdminUsersViewSet(viewsets.ModelViewSet):
 
     def get_queryset(self):
         queryset = self.queryset
-        return queryset.all()
+        return queryset.all().order_by('id')
+
+    @action(methods=['POST'], detail=True, url_path='upload-image')
+    def upload_image(self, request, pk=None):
+        # Upload an image to a page
+        user = self.request.user()
+        serializer = self.get_serializer(
+            user,
+            data=request.data
+        )
+
+        if serializer.is_valid():
+            serializer.save()
+            return Response(
+                serializer.data,
+                status=status.HTTP_200_OK
+            )
+
+        return Response(
+            serializer.errors,
+            status=status.HTTP_400_BAD_REQUEST
+        )

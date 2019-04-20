@@ -47,7 +47,7 @@ class PageViewSet(viewsets.ModelViewSet):
             category_ids = self._params_to_ints(categories)
             queryset = queryset.filter(categories__id__in=category_ids)
 
-        return queryset.filter()
+        return queryset.filter().order_by('-date')
 
     def get_serializer_class(self):
         # Return appropriate serializer class

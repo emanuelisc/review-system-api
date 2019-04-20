@@ -53,6 +53,7 @@ INSTALLED_APPS = [
     'ticket',
     'social_django',
     'rest_social_auth',
+    'corsheaders',
 ]
 
 MIDDLEWARE = [

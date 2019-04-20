@@ -187,16 +187,17 @@ class PrivatePageApiTests(TestCase):
         """ Test updating a page with patch for admin """
         page = sample_page()
         page.categories.add(sample_category())
+        sample = sample_category();
         new_category = sample_category(name='Naujiena')
 
-        payload = {'title': 'Page 1', 'categories': [new_category.id]}
+        payload = {'title': 'Page 1', 'categories': [new_category.id, sample.id]}
         url = detail_url(page.id)
         self.client.patch(url, payload)
 
         page.refresh_from_db()
         self.assertEqual(page.title, payload['title'])
         categories = page.categories.all()
-        self.assertEqual(len(categories), 1)
+        self.assertEqual(len(categories), 2)
         self.assertIn(new_category, categories)
 
     def test_full_update_recipe(self):

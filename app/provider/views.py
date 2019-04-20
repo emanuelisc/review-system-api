@@ -5,10 +5,29 @@ from rest_framework.authentication import TokenAuthentication
 from rest_framework.permissions import IsAuthenticated, IsAdminUser
 from rest_framework.exceptions import PermissionDenied
 
-from core.models import Provider, ProviderService
+from core.models import Provider, ProviderService, ProviderCategory
 from core.permissions import ReadOnly, IsCompany
 from core.request_log.mixins import RequestLogViewMixin
 from provider import serializers
+
+
+class CategoryViewSet(viewsets.ModelViewSet):
+    # Viewset for page attributes
+    authentication_classes = (TokenAuthentication,)
+    permission_classes = (IsAdminUser | ReadOnly,)
+    queryset = ProviderCategory.objects.all()
+    serializer_class = serializers.ProviderCategorySerializer
+
+    def get_queryset(self):
+        # Return objects
+        assigned_only = bool(
+            int(self.request.query_params.get('assigned_only', 0))
+        )
+        queryset = self.queryset
+        if assigned_only:
+            queryset = queryset.filter(page__isnull=False)
+
+        return queryset.all().order_by('-name').distinct()
 
 
 class ServiceOwnerViewSet(viewsets.ModelViewSet, RequestLogViewMixin):
@@ -130,12 +149,16 @@ class ProviderViewSet(viewsets.ModelViewSet, RequestLogViewMixin):
     def get_queryset(self):
         # Retrieve pages
         services = self.request.query_params.get('services')
+        categories = self.request.query_params.get('categories')
         queryset = self.queryset
         # print(self.request.META['REMOTE_ADDR'] + ' Testas3\n')
 
         if services:
             service_ids = self._params_to_ints(services)
             queryset = queryset.filter(services__id__in=service_ids)
+        if categories:
+            category_ids = self._params_to_ints(categories)
+            queryset = queryset.filter(categories__id__in=category_ids)
 
         return queryset.all().distinct()
 

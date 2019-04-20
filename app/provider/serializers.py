@@ -1,6 +1,15 @@
 from rest_framework import serializers
 
-from core.models import Provider, ProviderService
+from core.models import Provider, ProviderService, ProviderCategory
+
+
+class ProviderCategorySerializer(serializers.ModelSerializer):
+    # Serializer for ingretient object
+
+    class Meta:
+        model = ProviderCategory
+        fields = ('id', 'name')
+        read_only_fields = ('id',)
 
 
 class ProviderServiceSerializer(serializers.ModelSerializer):
@@ -27,6 +36,11 @@ class ProviderSerializer(serializers.ModelSerializer):
         queryset=ProviderService.objects.all()
     )
 
+    categories = serializers.PrimaryKeyRelatedField(
+        many=True,
+        queryset=ProviderCategory.objects.all()
+    )
+
     class Meta:
         model = Provider
         fields = (
@@ -37,6 +51,7 @@ class ProviderSerializer(serializers.ModelSerializer):
             'is_confirmed',
             'image',
             'services',
+            'categories',
             'admin_user',
             'reviews'
         )
@@ -46,6 +61,7 @@ class ProviderSerializer(serializers.ModelSerializer):
 class ProviderDetailSerializer(ProviderSerializer):
     # Serialize a provider details
     services = serializers.PrimaryKeyRelatedField(many=True, read_only=True)
+    categories = serializers.PrimaryKeyRelatedField(many=True, read_only=True)
 
 
 class ProviderImageSerializer(serializers.ModelSerializer):

@@ -15,10 +15,12 @@ class PageCategorySerializer(serializers.ModelSerializer):
 class PageSerializer(serializers.ModelSerializer):
     # Serialize a recipe
 
+    # categories = PageCategorySerializer(many=True, read_only=False)
     categories = serializers.PrimaryKeyRelatedField(
         many=True,
         queryset=PageCategory.objects.all()
     )
+    # categories = serializers.StringRelatedField(many=True)
 
     class Meta:
         model = Page
@@ -27,6 +29,7 @@ class PageSerializer(serializers.ModelSerializer):
             'title',
             'text',
             'slug',
+            'date',
             'categories',
             'image'
         )
@@ -35,7 +38,11 @@ class PageSerializer(serializers.ModelSerializer):
 
 class PageDetailSerializer(PageSerializer):
     # Serialize a page details
-    categories = PageCategorySerializer(many=True, read_only=True)
+    categories = serializers.PrimaryKeyRelatedField(
+        many=True,
+        queryset=PageCategory.objects.all()
+    )
+    # categories = PageCategorySerializer(many=True, read_only=False)
 
 
 class PageImageSerializer(serializers.ModelSerializer):

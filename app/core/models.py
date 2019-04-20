@@ -31,6 +31,14 @@ def provider_image_file_path(instance, filename):
     return os.path.join('uploads/providers/', filename)
 
 
+def user_image_file_path(instance, filename):
+    # Generate file path for new user image
+    ext = filename.split('.')[-1]
+    filename = f'{uuid.uuid4()}.{ext}'
+
+    return os.path.join('uploads/users/', filename)
+
+
 class UserManager(BaseUserManager):
 
     def create_user(self, email, password=None, **extra_fields):
@@ -67,6 +75,8 @@ class User(AbstractBaseUser, PermissionsMixin):
         on_delete=models.CASCADE,
         null=True
     )
+    image = models.ImageField(
+        null=True, upload_to=user_image_file_path)
     objects = UserManager()
 
     USERNAME_FIELD = 'email'
@@ -91,7 +101,7 @@ class Page(models.Model):
     text = models.TextField()
     slug = models.CharField(max_length=255, blank=True)
     date = models.DateField(auto_now=True)
-    categories = models.ManyToManyField('PageCategory')
+    categories = models.ManyToManyField('PageCategory', blank=True)
     image = models.ImageField(null=True, upload_to=page_image_file_path)
 
     def __str__(self):
@@ -123,9 +133,17 @@ class Provider(models.Model):
     is_active = models.BooleanField(default=True)
     is_confirmed = models.BooleanField(default=False)
     image = models.ImageField(null=True, upload_to=provider_image_file_path)
-
+    categories = models.ManyToManyField('ProviderCategory')
     def __str__(self):
         return self.title
+
+
+class ProviderCategory(models.Model):
+    # Provider category object
+    name = models.CharField(max_length=255)
+
+    def __str__(self):
+        return self.name
 
 
 class ProviderLog(models.Model):
