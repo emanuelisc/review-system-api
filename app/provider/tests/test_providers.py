@@ -74,7 +74,7 @@ class PublicProviderApiTests(TestCase):
         serializer = ProviderSerializer(providers, many=True)
 
         self.assertEqual(res.status_code, status.HTTP_200_OK)
-        self.assertEqual(res.data, serializer.data)
+        self.assertEqual(res.data['results'], serializer.data)
 
     def test_view_provider_detail(self):
         """ Test viewing a provider details """
@@ -103,9 +103,9 @@ class PublicProviderApiTests(TestCase):
         serializer2 = ProviderSerializer(provider2)
         serializer3 = ProviderSerializer(provider3)
 
-        self.assertIn(serializer1.data, res.data)
-        self.assertIn(serializer2.data, res.data)
-        self.assertNotIn(serializer3.data, res.data)
+        self.assertIn(serializer1.data, res.data['results'])
+        self.assertIn(serializer2.data, res.data['results'])
+        self.assertNotIn(serializer3.data, res.data['results'])
 
     def test_partial_update_provider(self):
         """ Test updating a provider with patch """
@@ -142,9 +142,9 @@ class PrivateProviderApiTests(TestCase):
         serializer = ProviderSerializer(providers, many=True)
 
         self.assertEqual(res.status_code, status.HTTP_200_OK)
-        self.assertEqual(len(res.data), 1)
+        self.assertEqual(len(res.data['results']), 1)
         self.assertEqual(len(serializer.data), 1)
-        self.assertEqual(res.data, serializer.data)
+        self.assertEqual(res.data['results'], serializer.data)
 
     def test_view_provider_detail(self):
         """ Test viewing a provider details for admin """
@@ -184,9 +184,9 @@ class PrivateProviderApiTests(TestCase):
         serializer2 = ProviderSerializer(provider2)
         serializer3 = ProviderSerializer(provider3)
 
-        self.assertIn(serializer1.data, res.data)
-        self.assertIn(serializer2.data, res.data)
-        self.assertNotIn(serializer3.data, res.data)
+        self.assertIn(serializer1.data, res.data['results'])
+        self.assertIn(serializer2.data, res.data['results'])
+        self.assertNotIn(serializer3.data, res.data['results'])
 
 
 class ProviderImageUploadTests(TestCase):

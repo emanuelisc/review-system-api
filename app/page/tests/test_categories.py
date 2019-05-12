@@ -39,7 +39,7 @@ class PublicCategoryApiTests(TestCase):
         categories = PageCategory.objects.all().order_by('-name')
         serializer = PageCategorySerializer(categories, many=True)
         self.assertEqual(res.status_code, status.HTTP_200_OK)
-        self.assertEqual(res.data, serializer.data)
+        self.assertEqual(res.data['results'], serializer.data)
 
     def test_create_category_public_unsuccessfull(self):
         """ Test create a new category for unauthorized on public end """
@@ -156,8 +156,8 @@ class PrivateAdminCategoryApiTests(TestCase):
 
         serializer1 = PageCategorySerializer(category1)
         serializer2 = PageCategorySerializer(category2)
-        self.assertIn(serializer1.data, res.data)
-        self.assertNotIn(serializer2.data, res.data)
+        self.assertIn(serializer1.data, res.data['results'])
+        self.assertNotIn(serializer2.data, res.data['results'])
 
     def test_retrieve_categories_assigned_unique(self):
         # Test filtering categories by assigned return unique items
@@ -175,4 +175,4 @@ class PrivateAdminCategoryApiTests(TestCase):
         page2.categories.add(category)
 
         res = self.client.get(CATEGORIES_URL, {'assigned_only': 1})
-        self.assertEqual(len(res.data), 1)
+        self.assertEqual(len(res.data['results']), 1)

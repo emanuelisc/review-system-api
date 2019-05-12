@@ -86,9 +86,9 @@ class PrivateUserApiTests(TestCase):
         create_user(**payload2)
 
         res = self.client.get(USERS_URL)
-
+        # print(res.data['results'])
         self.assertEqual(res.status_code, status.HTTP_200_OK)
-        self.assertEqual(len(res.data), 3)
+        self.assertEqual(len(res.data['results']), 3)
 
     def test_view_user_detail(self):
         # Test viewing a user detail

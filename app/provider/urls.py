@@ -18,4 +18,10 @@ app_name = 'provider'
 
 urlpatterns = [
     path('', include(router.urls)),
+    path('pro_stat/',
+         views.GetProviderStats.as_view(), name='provider_stats'),
+    path('stat/',
+         views.GetProviderReviewsStats.as_view(), name='provider_rev_stats'),
+    path('ser_stat/',
+         views.GetServiceStats.as_view(), name='service_stats'),
 ]

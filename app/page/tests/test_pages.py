@@ -64,7 +64,7 @@ class PublicPageApiTests(TestCase):
         serializer = PageSerializer(pages, many=True)
 
         self.assertEqual(res.status_code, status.HTTP_200_OK)
-        self.assertEqual(res.data, serializer.data)
+        self.assertEqual(res.data['results'], serializer.data)
 
     def test_view_page_detail(self):
         """ Test viewing a page details """
@@ -96,9 +96,9 @@ class PublicPageApiTests(TestCase):
         serializer2 = PageSerializer(page2)
         serializer3 = PageSerializer(page3)
 
-        self.assertIn(serializer1.data, res.data)
-        self.assertIn(serializer2.data, res.data)
-        self.assertNotIn(serializer3.data, res.data)
+        self.assertIn(serializer1.data, res.data['results'])
+        self.assertIn(serializer2.data, res.data['results'])
+        self.assertNotIn(serializer3.data, res.data['results'])
 
     def test_partial_update_page(self):
         """ Test updating a page with patch """
@@ -136,9 +136,9 @@ class PrivatePageApiTests(TestCase):
         serializer = PageSerializer(pages, many=True)
 
         self.assertEqual(res.status_code, status.HTTP_200_OK)
-        self.assertEqual(len(res.data), 1)
+        self.assertEqual(len(res.data['results']), 1)
         self.assertEqual(len(serializer.data), 1)
-        self.assertEqual(res.data, serializer.data)
+        self.assertEqual(res.data['results'], serializer.data)
 
     def test_view_page_detail(self):
         """ Test viewing a page details for admin """
@@ -187,10 +187,11 @@ class PrivatePageApiTests(TestCase):
         """ Test updating a page with patch for admin """
         page = sample_page()
         page.categories.add(sample_category())
-        sample = sample_category();
+        sample = sample_category()
         new_category = sample_category(name='Naujiena')
 
-        payload = {'title': 'Page 1', 'categories': [new_category.id, sample.id]}
+        payload = {'title': 'Page 1', 'categories': [
+            new_category.id, sample.id]}
         url = detail_url(page.id)
         self.client.patch(url, payload)
 
@@ -238,9 +239,9 @@ class PrivatePageApiTests(TestCase):
         serializer2 = PageSerializer(page2)
         serializer3 = PageSerializer(page3)
 
-        self.assertIn(serializer1.data, res.data)
-        self.assertIn(serializer2.data, res.data)
-        self.assertNotIn(serializer3.data, res.data)
+        self.assertIn(serializer1.data, res.data['results'])
+        self.assertIn(serializer2.data, res.data['results'])
+        self.assertNotIn(serializer3.data, res.data['results'])
 
 
 class PageImageUploadTests(TestCase):

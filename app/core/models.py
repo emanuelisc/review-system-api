@@ -134,6 +134,7 @@ class Provider(models.Model):
     is_confirmed = models.BooleanField(default=False)
     image = models.ImageField(null=True, upload_to=provider_image_file_path)
     categories = models.ManyToManyField('ProviderCategory')
+
     def __str__(self):
         return self.title
 
@@ -165,8 +166,8 @@ class ServiceLog(models.Model):
 class ReviewLog(models.Model):
     # Object for provider page logging
     date = models.DateField(auto_now=True)
-    ip = models.CharField(max_length=255)
-    country = country = models.CharField(max_length=255, blank=True)
+    ip = models.CharField(max_length=255, null=True)
+    country = country = models.CharField(max_length=255, null=True)
     review = models.ForeignKey('Review', on_delete=models.CASCADE)
 
 
@@ -197,18 +198,24 @@ class Review(models.Model):
     categories = models.ManyToManyField('ReviewCategory')
     tags = models.ManyToManyField('HashTag')
     is_auto_confirmed = models.BooleanField(default=False)
-    confirmation_text = models.TextField(blank=True)
+    confirmation_text = models.TextField(null=True)
     is_confirmed = models.BooleanField(default=False)
     is_anon = models.BooleanField(default=False)
     image = models.ImageField(null=True, upload_to=provider_image_file_path)
     user = models.ForeignKey(
         settings.AUTH_USER_MODEL,
-        on_delete=models.CASCADE
+        on_delete=models.DO_NOTHING
     )
     service = models.ForeignKey(
-        'ProviderService', related_name='reviews', null=True, on_delete=models.DO_NOTHING)
+        'ProviderService',
+        related_name='reviews',
+        null=True,
+        on_delete=models.DO_NOTHING)
     provider = models.ForeignKey(
-        'Provider', related_name='reviews', null=True, on_delete=models.DO_NOTHING)
+        'Provider',
+        related_name='reviews',
+        null=True,
+        on_delete=models.DO_NOTHING)
 
     def __str__(self):
         return self.title
@@ -247,8 +254,15 @@ class Comment(models.Model):
     # Review comment object
     content = models.TextField()
     parent = models.ForeignKey(
-        'self', related_name='reply_set', null=True, on_delete=models.CASCADE)
-    review = models.ForeignKey('Review', on_delete=models.CASCADE, default=1)
+        'self',
+        related_name='reply_set',
+        null=True,
+        on_delete=models.DO_NOTHING)
+    review = models.ForeignKey(
+        'Review',
+        related_name='comments',
+        on_delete=models.CASCADE,
+        default=1)
     date = models.DateField(auto_now=True)
     rating = models.IntegerField(default=0)
     is_auto_confirmed = models.BooleanField(default=False)
@@ -259,7 +273,3 @@ class Comment(models.Model):
         settings.AUTH_USER_MODEL,
         on_delete=models.CASCADE
     )
-
-    def __str__(self):
-        content = str(self.content).rstrip(40)
-        return content

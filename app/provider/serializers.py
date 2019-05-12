@@ -62,6 +62,7 @@ class ProviderDetailSerializer(ProviderSerializer):
     # Serialize a provider details
     services = serializers.PrimaryKeyRelatedField(many=True, read_only=True)
     categories = serializers.PrimaryKeyRelatedField(many=True, read_only=True)
+    reviews = serializers.PrimaryKeyRelatedField(many=True, read_only=True)
 
 
 class ProviderImageSerializer(serializers.ModelSerializer):

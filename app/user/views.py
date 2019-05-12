@@ -1,14 +1,14 @@
 from rest_framework.decorators import action
 from rest_framework.response import Response
-from rest_framework import generics, authentication, permissions, viewsets, status
+from rest_framework import generics, authentication, \
+    permissions, viewsets, status
 from rest_framework.authtoken.views import ObtainAuthToken
 from rest_framework.authtoken.models import Token
 from rest_framework.settings import api_settings
 
 from user.serializers import UserSerializer, \
     AuthTokenSerializer, \
-    AdminUsersSerializer, \
-    UserImageSerializer
+    AdminUsersSerializer
 
 from core.models import User, ValidationToken
 from user.mail import ValidateEmail
@@ -75,6 +75,10 @@ class CreateTokenView(ObtainAuthToken):
 
 
 class ManageUserView(generics.RetrieveUpdateAPIView):
+
+    """
+    Return a list of all the existing users.
+    """
     # Manage the authenticated user
     serializer_class = UserSerializer
     authentication_classes = (authentication.TokenAuthentication,)

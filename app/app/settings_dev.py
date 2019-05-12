@@ -47,6 +47,7 @@ INSTALLED_APPS = [
     'social_django',
     'rest_social_auth',
     'corsheaders',
+    'django_extensions',
 ]
 
 MIDDLEWARE = [
@@ -133,9 +134,10 @@ SOCIAL_AUTH_FACEBOOK_KEY = '295137440610143'
 SOCIAL_AUTH_FACEBOOK_SECRET = '4b4aef291799a7b9aaf016689339e97f'
 SOCIAL_AUTH_FACEBOOK_SCOPE = ['email', ]
 
-SOCIAL_AUTH_GOOGLE_OAUTH2_KEY = '976099811367-ihbmg1pfnniln9qgfacleiu41bhl3fqn.apps.googleusercontent.com'
-SOCIAL_AUTH_GOOGLE_OAUTH2_SECRET = 'JaiLLvY1BK97TSy5_xcGWDhp'
-SOCIAL_AUTH_GOOGLE_OAUTH2_SCOPE = ['email', ]
+SOCIAL_AUTH_GOOGLE_OAUTH2_KEY = '817565437068\
+    -undv4r71jcspcj1a70nhdama8jdp64to.apps.googleusercontent.com'
+SOCIAL_AUTH_GOOGLE_OAUTH2_SECRET = 'l4znaAvBOIqdhfOmCZOwjrnz'
+SOCIAL_AUTH_GOOGLE_OAUTH2_SCOPE = ['email', 'profile', ]
 
 
 

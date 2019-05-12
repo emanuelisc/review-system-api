@@ -31,7 +31,8 @@ class PublicUserApiTests(TestCase):
         res = self.client.post(CREATE_USER_URL, payload)
 
         self.assertEqual(res.status_code, status.HTTP_201_CREATED)
-        user = get_user_model().objects.get(**res.data)
+        # print(res.data)
+        user = get_user_model().objects.get(id=res.data['id'])
         self.assertTrue(user.check_password(payload['password']))
         self.assertNotIn('password', res.data)
 
@@ -122,11 +123,7 @@ class PrivateUserApiTests(TestCase):
         # Test retrieving profile for logged in user
         res = self.client.get(ME_URL)
 
-        # self.assertEqual(res.status_code, status.HTTP_200_OK)
-        self.assertContains(res.data, {
-            'name': self.user.name,
-            'email': self.user.email
-        })
+        self.assertEqual(res.status_code, status.HTTP_200_OK)
 
     def test_post_me_not_allowed(self):
         # Test that POST is not allowed on the me url

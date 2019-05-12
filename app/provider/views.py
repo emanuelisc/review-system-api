@@ -1,13 +1,18 @@
+import datetime
+import json
+
 from rest_framework.decorators import action
 from rest_framework.response import Response
-from rest_framework import viewsets, status
+from rest_framework import viewsets, status, generics
 from rest_framework.authentication import TokenAuthentication
 from rest_framework.permissions import IsAuthenticated, IsAdminUser
 from rest_framework.exceptions import PermissionDenied
 
-from core.models import Provider, ProviderService, ProviderCategory
+from core.models import Provider, ProviderService, \
+    ProviderCategory, ProviderLog, ServiceLog
 from core.permissions import ReadOnly, IsCompany
 from core.request_log.mixins import RequestLogViewMixin
+from core.logging import ProviderLogging, ServiceLogging
 from provider import serializers
 
 
@@ -62,7 +67,10 @@ class ServiceViewSet(viewsets.ModelViewSet):
     def get_queryset(self):
         # Return objects
         queryset = self.queryset
-        return queryset.all().order_by('-title').distinct()
+        ServiceLogging.log_get(self, self.request)
+        if provider:
+            queryset = queryset.filter(provider=provider)
+        return queryset.all().order_by('-title')
 
 
 class ProviderOwnerViewSet(viewsets.ModelViewSet, RequestLogViewMixin):
@@ -147,12 +155,11 @@ class ProviderViewSet(viewsets.ModelViewSet, RequestLogViewMixin):
         return [int(str_id) for str_id in qs.split(',')]
 
     def get_queryset(self):
-        # Retrieve pages
+        # Retrieve providers
         services = self.request.query_params.get('services')
         categories = self.request.query_params.get('categories')
         queryset = self.queryset
-        # print(self.request.META['REMOTE_ADDR'] + ' Testas3\n')
-
+        ProviderLogging.log_get(self, self.request)
         if services:
             service_ids = self._params_to_ints(services)
             queryset = queryset.filter(services__id__in=service_ids)
@@ -170,10 +177,6 @@ class ProviderViewSet(viewsets.ModelViewSet, RequestLogViewMixin):
             return serializers.ProviderImageSerializer
 
         return self.serializer_class
-
-    def perform_create(self, serializer):
-        # Create a new serializer
-        serializer.save()
 
     @action(methods=['POST'], detail=True, url_path='upload-image')
     def upload_image(self, request, pk=None):
@@ -195,3 +198,93 @@ class ProviderViewSet(viewsets.ModelViewSet, RequestLogViewMixin):
             serializer.errors,
             status=status.HTTP_400_BAD_REQUEST
         )
+
+
+class GetProviderStats(generics.RetrieveAPIView):
+    def get(self, serializer):
+        interval = self.request.query_params.get('interval', None)
+        provider_id = self.request.query_params.get('id', None)
+        if provider_id == None:
+            return Response(
+                {'error': 'No provider id'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        logs = ProviderLog.objects.filter(provider_id=provider_id)
+        if interval:
+            data = {}
+            for i in range(int(interval)):
+                newDate = datetime.date.today() - datetime.timedelta(days=i)
+                data[str(newDate)] = logs.filter(date=newDate).count()
+            return Response(
+                data,
+                status=status.HTTP_200_OK
+            )
+        else:
+            data = {}
+            for i in range(3):
+                newDate = datetime.date.today() - datetime.timedelta(days=i)
+                data[str(newDate)] = logs.filter(date=newDate).count()
+            return Response(
+                data,
+                status=status.HTTP_200_OK
+            )
+
+
+class GetProviderReviewsStats(generics.RetrieveAPIView):
+    def get(self, serializer):
+        interval = self.request.query_params.get('interval', None)
+        provider_id = self.request.query_params.get('id', None)
+        if provider_id == None:
+            return Response(
+                {'error': 'No provider id'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        logs = ReviewLog.objects.filter(provider_id=provider_id)
+        if interval:
+            data = {}
+            for i in range(int(interval)):
+                newDate = datetime.date.today() - datetime.timedelta(days=i)
+                data[str(newDate)] = logs.filter(date=newDate).count()
+            return Response(
+                data,
+                status=status.HTTP_200_OK
+            )
+        else:
+            data = {}
+            for i in range(3):
+                newDate = datetime.date.today() - datetime.timedelta(days=i)
+                data[str(newDate)] = logs.filter(date=newDate).count()
+            return Response(
+                data,
+                status=status.HTTP_200_OK
+            )
+
+
+class GetServiceStats(generics.RetrieveAPIView):
+    def get(self, serializer):
+        interval = self.request.query_params.get('interval', None)
+        service_id = self.request.query_params.get('id', None)
+        if service_id == None:
+            return Response(
+                {'error': 'No review id'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        logs = ServiceLog.objects.filter(service_id=service_id)
+        if interval:
+            data = {}
+            for i in range(int(interval)):
+                newDate = datetime.date.today() - datetime.timedelta(days=i)
+                data[str(newDate)] = logs.filter(date=newDate).count()
+            return Response(
+                data,
+                status=status.HTTP_200_OK
+            )
+        else:
+            data = {}
+            for i in range(3):
+                newDate = datetime.date.today() - datetime.timedelta(days=i)
+                data[str(newDate)] = logs.filter(date=newDate).count()
+            return Response(
+                data,
+                status=status.HTTP_200_OK
+            )

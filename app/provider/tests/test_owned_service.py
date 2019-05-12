@@ -151,7 +151,7 @@ class PrivateAdminServiceApiTests(TestCase):
         res = self.client.get(SERVICES_URL)
         self.assertEqual(res.status_code, status.HTTP_200_OK)
         # self.assertTrue(exists)
-        self.assertEqual(len(res.data), 1)
+        self.assertEqual(len(res.data['results']), 1)
 
     def test_service_details(self):
         """ Test service details """

@@ -7,7 +7,7 @@ COPY ./requirements.txt /requirements.txt
 RUN apk update
 RUN apk add --update --no-cache postgresql-client jpeg-dev
 RUN apk add --update --no-cache --virtual .tmp-build-deps \
-    gcc libc-dev linux-headers postgresql-dev musl-dev zlib zlib-dev
+    gcc libc-dev linux-headers postgresql-dev musl-dev zlib zlib-dev graphviz git
 RUN pip install -r /requirements.txt
 RUN apk del .tmp-build-deps
 

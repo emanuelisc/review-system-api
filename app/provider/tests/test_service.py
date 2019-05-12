@@ -75,7 +75,7 @@ class PublicServiceApiTests(TestCase):
         services = ProviderService.objects.all().order_by('-title')
         serializer = ProviderServiceSerializer(services, many=True)
         self.assertEqual(res.status_code, status.HTTP_200_OK)
-        self.assertEqual(res.data, serializer.data)
+        self.assertEqual(res.data['results'], serializer.data)
 
     def test_create_service_public_unsuccessfull(self):
         """ Test create a new service for unauthorized on public end """
@@ -153,7 +153,7 @@ class PrivateAdminServiceApiTests(TestCase):
         res = self.client.get(SERVICES_URL)
         self.assertEqual(res.status_code, status.HTTP_200_OK)
         # self.assertTrue(exists)
-        self.assertEqual(len(res.data), 1)
+        self.assertEqual(len(res.data['results']), 1)
 
     def test_service_details(self):
         """ Test service details """

@@ -9,7 +9,7 @@ class UserSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = get_user_model()
-        fields = ('email', 'password', 'name',
+        fields = ('id', 'email', 'password', 'name',
                   'is_confirmed', 'is_company', 'is_staff', 'image')
         extra_kwargs = {'password': {'write_only': True, 'min_length': 5}}
         read_only_fields = ('is_confirmed', 'is_company', 'is_staff',)
@@ -60,9 +60,24 @@ class AdminUsersSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = get_user_model()
-        fields = ('id', 'email', 'password', 'name',
-                  'is_staff', 'is_company', 'is_active', 'is_confirmed', 'provider_id', 'image')
-        extra_kwargs = {'password': {'write_only': True, 'min_length': 5}}
+        fields = (
+            'id',
+            'email',
+            'password',
+            'name',
+            'is_staff',
+            'is_company',
+            'is_active',
+            'is_confirmed',
+            'provider_id',
+            'image'
+        )
+        extra_kwargs = {
+            'password': {
+                'write_only': True,
+                'min_length': 5
+            }
+        }
         read_only_fields = ('id',)
 
     def update(self, instance, validated_data):

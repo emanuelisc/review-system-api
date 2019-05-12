@@ -1,5 +1,4 @@
 from django.conf import settings
-from django.utils.crypto import get_random_string
 
 import smtplib
 import random
@@ -30,12 +29,21 @@ class ValidateEmail():
         account_activation_token = token_generator()
         ValidationToken.objects.create(
             user_email=mail_address, token=account_activation_token)
-        validation_link = 'http://localhost:8000/api/user/activate_account/?email='
+        validation_link = 'http://localhost:8000/\
+            api/user/activate_account/?email='
         validation_link += mail_address
         validation_link += '&token='
         validation_link += str(account_activation_token)
-        send_email('emanuelisc@gmail.com', name, get_validation_message(
-            mail_address, name, validation_link, str(account_activation_token)))
+        send_email(
+            'emanuelisc@gmail.com',
+            name,
+            get_validation_message(
+                mail_address,
+                name,
+                validation_link,
+                str(account_activation_token)
+            )
+        )
 
 
 class ConfirmAnonReview():
@@ -45,11 +53,20 @@ class ConfirmAnonReview():
         account_activation_token = token_generator()
         ValidationToken.objects.create(
             user_email=mail_address, token=account_activation_token)
-        validation_link = 'http://localhost:8000/api/review/confirm_review/?email='
+        validation_link = 'http://localhost:8000/\
+            api/review/confirm_review/?email='
         validation_link += mail_address
         validation_link += '&token='
         validation_link += str(account_activation_token)
         validation_link += '&review='
         validation_link += str(review_id)
-        send_email('emanuelisc@gmail.com', name, get_validation_message(
-            mail_address, name, validation_link, str(account_activation_token)))
+        send_email(
+            'emanuelisc@gmail.com',
+            name,
+            get_validation_message(
+                mail_address,
+                name,
+                validation_link,
+                str(account_activation_token)
+            )
+        )
