@@ -181,11 +181,16 @@ class PostRating(generics.RetrieveAPIView):
             review = Review.objects.filter(id=review_id).first()
             if review == None:
                 return Response(status=status.HTTP_404_NOT_FOUND)
+            review_rating_logs = RatingLog.objects.filter(review_id=review_id)
+            can_add = review_rating_logs.filter(user_id=user)
+            if can_add:
+                return Response(status=status.HTTP_403_FORBIDDEN)
             if value == '1':
                 review.rating = review.rating - 1
             else:
                 review.rating = review.rating + 1
             review.save()
+            RatingLog.objects.create(review_id=review_id, user_id=user)
             return Response(
                 {'success': 'Rating added'},
                 status=status.HTTP_200_OK
