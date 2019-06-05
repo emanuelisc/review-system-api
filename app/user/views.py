@@ -8,9 +8,10 @@ from rest_framework.settings import api_settings
 
 from user.serializers import UserSerializer, \
     AuthTokenSerializer, \
-    AdminUsersSerializer
+    AdminUsersSerializer, \
+    PublicUserSerializer
 
-from core.models import User, ValidationToken
+from core.models import User, ValidationToken, Provider
 from user.mail import ValidateEmail
 
 
@@ -63,11 +64,22 @@ class CreateTokenView(ObtainAuthToken):
         serializer.is_valid(raise_exception=True)
         user = serializer.validated_data['user']
         token, created = Token.objects.get_or_create(user=user)
+        provider_id = None
+        if user.is_company :
+            if(user.provider_id):
+                provider_id = user.provider_id
+            else:
+                pro = Provider.objects.filter(admin_user_id=user.id).first()
+                provider_id = pro.id
+
+
         return Response({
             'token': token.key,
             'me': {
+                'id': user.id,
                 'email': user.email,
                 'name': user.name,
+                'provider': provider_id,
                 'is_staff': user.is_staff,
                 'is_company': user.is_company
             }
@@ -125,6 +137,13 @@ class AdminUsersViewSet(viewsets.ModelViewSet):
         queryset = self.queryset
         return queryset.all().order_by('id')
 
+    def perform_create(self, serializer):
+        # Create a new serializer
+
+        mail_address = serializer.validated_data['email']
+        name = serializer.validated_data['name']
+        serializer.save()
+
     @action(methods=['POST'], detail=True, url_path='upload-image')
     def upload_image(self, request, pk=None):
         # Upload an image to a page
@@ -145,3 +164,11 @@ class AdminUsersViewSet(viewsets.ModelViewSet):
             serializer.errors,
             status=status.HTTP_400_BAD_REQUEST
         )
+
+
+class PublicViewSet(viewsets.ReadOnlyModelViewSet):
+    """
+    A simple ViewSet for viewing accounts.
+    """
+    queryset = User.objects.all()
+    serializer_class = PublicUserSerializer

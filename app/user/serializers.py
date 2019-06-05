@@ -4,6 +4,14 @@ from django.utils.translation import ugettext_lazy as _
 from rest_framework import serializers
 
 
+class PublicUserSerializer(serializers.ModelSerializer):
+    # Serializer for public user info access
+    class Meta:
+        model = get_user_model()
+        fields = ('id', 'email', 'name',
+                  'is_company', 'image')
+
+
 class UserSerializer(serializers.ModelSerializer):
     # Serializer for the users object
 
@@ -93,6 +101,10 @@ class AdminUsersSerializer(serializers.ModelSerializer):
         else:
             user.save()
             return user
+        
+    def create(self, validated_data):
+        # Create a new user with encrypted password and return it
+        return get_user_model().objects.create_user(**validated_data)
 
 
 class UserImageSerializer(serializers.ModelSerializer):

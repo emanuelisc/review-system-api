@@ -65,6 +65,7 @@ class ReviewSerializer(serializers.ModelSerializer):
             'title',
             'description',
             'rating',
+            'provider',
             'categories',
             'tags',
             'date',

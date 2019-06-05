@@ -80,6 +80,7 @@ class ReviewViewSet(viewsets.ModelViewSet):
         # Retrieve the reviews
         tags = self.request.query_params.get('tags')
         categories = self.request.query_params.get('categories')
+        providers = self.request.query_params.get('providers')
         queryset = self.queryset
         user_id = int(self.request.query_params.get('user_id', 0))
         ReviewLogging.log_get(self, self.request)
@@ -89,6 +90,9 @@ class ReviewViewSet(viewsets.ModelViewSet):
         if categories:
             category_ids = self._params_to_ints(categories)
             queryset = queryset.filter(categories__id__in=category_ids)
+        if providers:
+            # provider_ids = self._params_to_ints(providers)
+            queryset = queryset.filter(provider_id=providers)
         if user_id == 0:
             return queryset.all()
         elif user_id == -1:
@@ -108,6 +112,7 @@ class ReviewViewSet(viewsets.ModelViewSet):
         # Create a new serializer
         title = serializer.validated_data['title']
         text = serializer.validated_data['description']
+        # provider = serializer.validated_data['provider']
         validation = filter_request.make_request(title, text)
         if validation['results'] == 0:
             serializer.validated_data['is_auto_confirmed'] = False
@@ -118,10 +123,20 @@ class ReviewViewSet(viewsets.ModelViewSet):
         serializer.save(user=self.request.user)
 
     def perform_update(self, serializer):
-        if self.request.user.is_staff is True:
-            serializer.save()
-        elif serializer.validated_data['user'] != self.request.user:
-            raise PermissionDenied('You cannot update this object!')
+        # if self.request.user.is_staff is True:
+            # serializer.save()
+        # elif serializer.validated_data['user'] != self.request.user:
+            # raise PermissionDenied('You cannot update this object!')
+        title = serializer.validated_data['title']
+        text = serializer.validated_data['description']
+        # provider = serializer.validated_data['provider']
+        validation = filter_request.make_request(title, text)
+        if validation['results'] == 0:
+            serializer.validated_data['is_auto_confirmed'] = False
+        else:
+            serializer.validated_data['is_auto_confirmed'] = True
+        serializer.validated_data['confirmation_text'] \
+            = validation['probability']
         serializer.save()
 
     def perform_destroy(self, instance):
@@ -185,7 +200,8 @@ class PostRating(generics.RetrieveAPIView):
             can_add = review_rating_logs.filter(user_id=user)
             if can_add:
                 return Response(status=status.HTTP_403_FORBIDDEN)
-            if value == '1':
+            print(user)
+            if value == '1/':
                 review.rating = review.rating - 1
             else:
                 review.rating = review.rating + 1

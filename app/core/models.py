@@ -1,8 +1,8 @@
 import uuid
 import os
 from django.db import models
-from django.contrib.auth.models import AbstractBaseUser, BaseUserManager, \
-    PermissionsMixin
+from django.contrib.auth.models import AbstractBaseUser, \
+    BaseUserManager, PermissionsMixin
 
 from django.conf import settings
 
@@ -257,7 +257,7 @@ class Comment(models.Model):
         'self',
         related_name='reply_set',
         null=True,
-        on_delete=models.DO_NOTHING)
+        on_delete=models.CASCADE)
     review = models.ForeignKey(
         'Review',
         related_name='comments',
